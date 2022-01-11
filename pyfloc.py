@@ -228,22 +228,23 @@ def filesorter(path, extension, sortby=os.path.basename):
 
 
 #%%
+#path='C:\\Users\\tashl\\OneDrive\\Documents\\GitHub\\pyfloc\\pyfloc\\testdata'
 
-path='C:\\Users\\tashl\\OneDrive\\Documents\\GitHub\\pyfloc\\pyfloc\\testdata'
+#path = 'E:\\RUN-01A_2021-08-22_00mgl-NaCl_0p0mglXg_KAO\\side_floc_cam'
+path = 'E:\\RUN-01A_2021-08-22_00mgl-NaCl_0p0mglXg_KAO\\bed_floc_cam'
 
-def custom_datetime(fpath, dtprefix='img-'):
+def custom_datetime(fpath, dtprefix='bed_img-'):
     i0 = len(dtprefix)
     detlen = 14
     return dt.datetime.strptime(os.path.basename(fpath[i0:i0+dtlen],
                                                  '%m%d%Y%H%M%S'))
 
 flist = filesorter(path, '.png', custom_datetime)
-
 #%%
 out = run(flist, 
           resolution=0.95, 
           min_area=0, 
-          max_edgewidth=np.inf, 
+          max_edgewidth=np.inf,
           extra_params=[], 
           index=None,
           save=True,
