@@ -201,7 +201,10 @@ def run(flist, resolution, min_area, max_edgewidth,
         if save==True:
             flocdf.to_csv(fname+'.csv', index_label='floc_ID')
             
-        return img_object, seg, flocdf
+        if index != None:
+            return img_object, seg, flocdf
+        else:
+            return None
     
     if method=='difference':
         startix = 1
