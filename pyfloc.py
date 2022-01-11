@@ -222,30 +222,28 @@ def run(flist, resolution, min_area, max_edgewidth,
         Parallel(n_jobs=n_jobs)(delayed(process_one)(imgix) for imgix in iterlist)
     
 
-def filesorter(path, extension, sortby=os.path.basename):
-    unsorted_flist = glob.glob(path+os.sep+'*'+extension)
+def file_sorter(path, extension=None, sortby=os.path.basename):
+    # gets all files if extension isn't specified. Only works if there are no other files in the folder.
+    if extension==None:
+        unsorted_flist = glob.glob(path+os.sep+'*')
+    else:
+        unsorted_flist = glob.glob(path+os.sep+'*'+extension)
     return sorted(unsorted_flist)
 
+# ===================================================================
+# Main
+# ===================================================================
 
-#%%
-#path='C:\\Users\\tashl\\OneDrive\\Documents\\GitHub\\pyfloc\\pyfloc\\testdata'
+if __name__ == "__main__":
+    path = os.getcwd()
 
-#path = 'E:\\RUN-01A_2021-08-22_00mgl-NaCl_0p0mglXg_KAO\\side_floc_cam'
-path = 'E:\\RUN-01A_2021-08-22_00mgl-NaCl_0p0mglXg_KAO\\bed_floc_cam'
+    flist = file_sorter(path, extension=None)
 
-def custom_datetime(fpath, dtprefix='bed_img-'):
-    i0 = len(dtprefix)
-    detlen = 14
-    return dt.datetime.strptime(os.path.basename(fpath[i0:i0+dtlen],
-                                                 '%m%d%Y%H%M%S'))
-
-flist = filesorter(path, '.png', custom_datetime)
-#%%
-out = run(flist, 
-          resolution=0.95, 
-          min_area=0, 
-          max_edgewidth=np.inf,
-          extra_params=[], 
-          index=None,
-          save=True,
-          n_jobs=4)
+    out = run(flist, 
+              resolution=1,             # units per pixel
+              min_area=0,               # minimum floc size to save (units)
+              max_edgewidth=np.inf,     # maximum value of edge width to save (proxy for focus)
+              extra_params=[],          # specify other parameters to save
+              index=None,               # process a single image
+              save=True,                # save results as a csv
+              n_jobs=4)                 # parallel processing. Set n_jobs=1 to skip parallel processing.
