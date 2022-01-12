@@ -1,21 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jan 10 12:42:59 2022
-
-@author: tashl
-"""
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Dec 22 13:56:43 2021
-
-@author: tashl
-"""
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jun  7 13:26:00 2021
-@author: tashl
-"""
-
 import os
 import glob
 import numpy as np
@@ -50,83 +32,24 @@ class FlocImg(object):
     
     """
     
-    def __init__(self, data, bgval, fgval, threshold):
+    def __init__(self, data, bgval, fgval, threshold, resolution):
         self.data = data
         self.bgval = bgval
         self.fgval = fgval
         self.threshold = threshold
-
-
-# ===================================================================
-class ImgLoader(object):
-    
-    def __init__(self, flist):
-        """Instantiate object for loading images
+        self.resolution = resolution
         
-        Arguments:
-          - flist: Sorted list of files. Order is important if using
-            image differencing.
-            
-        """
-            
-        self.flist = flist
-        self.nimg = len(self.flist)
+    def identify_flocs(self, extra_params=[]):
         
-    def difference(self, index):
-        """ Create FlocImg object using differencing algorithm """
-        
-        # load denoised images
-        target_img = denoise_wavelet(io.imread(flist[index]))
-        previous = denoise_wavelet(io.imread(flist[index-1]))
-
-        # compute image difference
-        img = target_img - previous
-        img[img > 0] = 0
-        
-        # calculate meta parameters
-        threshold = threshold_isodata(target_img)
-        bgval = np.nanmean(target_img[target_img > threshold])
-        fgval = np.nanmean(target_img[target_img < threshold])
-
-        # rescale image
-        data = bgval+img
-        data[data<0] = 0
-        return FlocImg(data, bgval, fgval, threshold)
-
-
-    def single(self, index):
-        """ Create FlocImg object using a single denoised image """
-        data = denoise_wavelet(io.imread(flist[imgix]))
-        # TODO: implement rolling ball filter for removing background
-        
-        # calculate meta parameters
-        threshold = threshold_isodata(data)
-        bgval = np.nanmean(data[data > threshold])
-        fgval = np.nanmean(data[data < threshold])
-        
-        return FlocImg(data, bgval, fgval, threshold)
-
-
-# ===================================================================
-class FlocID(object):
-    
-    def __init__(self, flocimg_object, resolution=0.95, extraparams=[]):
         """ Performs floc identification on target image 
         Arguments:
             
-        img_object: an instance of 
+        img_object: an instance of FlocImg
         
         """
         
-        self.resolution = resolution
-        imgdata = flocimg_object.data
-        bgval = flocimg_object.bgval
-        fgval = flocimg_object.fgval
-        threshold = flocimg_object.threshold
-        
-        
         # compute threshold using isodata method and segment image
-        self.segmentation = closing(imgdata<threshold, disk(1))
+        self.segmentation = closing(self.data<self.threshold, disk(1))
         
         # remove artifacts connected to image border
         self.cleared = clear_border(self.segmentation, buffer_size=1)
@@ -137,11 +60,11 @@ class FlocID(object):
                 
         # make dictionary of floc info
         self.flocs = regionprops_table(self.label_image,
-                                  properties=['area']+extraparams)
+                                  properties=['area']+extra_params)
         
         # calculate edge gradient (proxy for focus)
         edgemask = (self.label_image > 0) & ~(binary_erosion(self.label_image>0, square(3)))
-        rescaled_intensity = (imgdata - bgval)/(fgval - bgval)
+        rescaled_intensity = (self.data - self.bgval)/(self.fgval - self.bgval)
         grad = sobel(rescaled_intensity.astype(float))
         grad[~edgemask] = np.nan
         
@@ -168,6 +91,55 @@ class FlocID(object):
         return flocdf
 
 # ===================================================================
+class ImgLoader(object):
+    
+    def __init__(self, flist, resolution):
+        """Instantiate object for loading images
+        
+        Arguments:
+          - flist: Sorted list of files. Order is important if using
+            image differencing.
+            
+        """
+            
+        self.flist = flist
+        self.resolution = resolution
+        
+    def difference(self, index):
+        """ Create FlocImg object using differencing algorithm """
+        
+        # load denoised images
+        target_img = denoise_wavelet(io.imread(flist[index]))
+        previous = denoise_wavelet(io.imread(flist[index-1]))
+
+        # compute image difference
+        img = target_img - previous
+        img[img > 0] = 0
+        
+        # calculate meta parameters
+        threshold = threshold_isodata(target_img)
+        bgval = np.nanmean(target_img[target_img > threshold])
+        fgval = np.nanmean(target_img[target_img < threshold])
+
+        # rescale image
+        data = bgval+img
+        data[data<0] = 0
+        return FlocImg(data, bgval, fgval, threshold, self.resolution)
+
+
+    def single(self, index):
+        """ Create FlocImg object using a single denoised image """
+        data = denoise_wavelet(io.imread(flist[imgix]))
+        # TODO: implement rolling ball filter for removing background
+        
+        # calculate meta parameters
+        threshold = threshold_isodata(data)
+        bgval = np.nanmean(data[data > threshold])
+        fgval = np.nanmean(data[data < threshold])
+        
+        return FlocImg(data, bgval, fgval, threshold, self.resolution)
+
+# ===================================================================
 # Functions
 # ===================================================================
 
@@ -177,34 +149,29 @@ def run(flist, resolution, min_area, max_edgewidth,
         n_jobs=1):
     
     # Instantiate image loader object
-    load_img = ImgLoader(flist)
+    load_img = ImgLoader(flist, resolution)
     
     def process_one(i):
-        # report progress
-        if i % 10 == 0:
-            print('Processing {}/{} \t at \t{}'.format(i, len(flist), time.asctime()))
-        
-        if method=='difference':
-            img_object = load_img.difference(i)
-        elif method=='single':
-            img_object = load_img.single(i)
-        
         # get filename for saving
         fname = os.path.splitext(flist[i])[0]
         
+        # instantiate image object using chosen method
+        if method=='difference':
+            floc_img = load_img.difference(i)
+        elif method=='single':
+            floc_img = load_img.single(i)
+    
         # perform floc ID
-        seg = FlocID(img_object)
+        floc_img.identify_flocs(extra_params)
         
         # get floc dataframe and save
-        flocdf = seg.get_floc_table(min_area, max_edgewidth)
+        flocdf = floc_img.get_floc_table(min_area, max_edgewidth)
         
         if save==True:
             flocdf.to_csv(fname+'.csv', index_label='floc_ID')
-            
-        if index != None:
-            return img_object, seg, flocdf
-        else:
-            return None
+        
+        if isinstance(index, int):
+            return floc_img
     
     if method=='difference':
         startix = 1
@@ -212,27 +179,24 @@ def run(flist, resolution, min_area, max_edgewidth,
         startix=0
     
     # if index isn't specified, iterate over all files in flist
-    if index==None:
-        iterlist = range(startix, len(flist))
-    else:
+    if isinstance(index, int):
         iterlist = [index,]
+    elif isinstance(index, type(None)):
+        iterlist = range(len(flist))
+    else: 
+        iterlist = index
     
-    if index!=None:
-        out = process_one(index)
+    if isinstance(index, int):
+        return process_one(index)
     elif n_jobs==1:
         [process_one(imgix) for imgix in iterlist]
     else:
         Parallel(n_jobs=n_jobs)(delayed(process_one)(imgix) for imgix in iterlist)
     
 
-def file_sorter(path, extension=None, sortby=os.path.basename):
-    # gets all files if extension isn't specified. Only works if there are no other files in the folder.
-    if extension==None:
-        unsorted_flist = glob.glob(path+os.sep+'*')
-    else:
-        unsorted_flist = glob.glob(path+os.sep+'*'+extension)
+def filesorter(path, extension, sortby=os.path.basename):
+    unsorted_flist = glob.glob(path+os.sep+'*'+extension)
     return sorted(unsorted_flist)
-
 # ===================================================================
 # Main
 # ===================================================================
