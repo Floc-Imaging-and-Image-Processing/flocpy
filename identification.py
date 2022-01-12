@@ -196,7 +196,7 @@ def run(flist, resolution, min_area, max_edgewidth,
 
 def filesorter(path, extension, sortby=os.path.basename):
     unsorted_flist = glob.glob(path+os.sep+'*'+extension)
-    return sorted(unsorted_flist)
+    return sorted(unsorted_flist, key=sortby)
 # ===================================================================
 # Main
 # ===================================================================
