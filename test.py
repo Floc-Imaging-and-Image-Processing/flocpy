@@ -21,14 +21,3 @@ def dotest():
               n_jobs=1)                 # parallel processing. Set n_jobs=1 to skip parallel processing.
 
     print('Single Core Test Successful.', end='\t\t\t\t\n')
-
-    out = run(flist, 
-              resolution=0.95,          # units per pixel
-              min_area=100,             # minimum floc size to save (units)
-              max_edgewidth=5,          # maximum value of edge width to save (proxy for focus)
-              extra_params=[],          # specify other parameters to save
-              index=None,               # process a single image
-              save=False,               # save results as a csv
-              n_jobs=2)                 # parallel processing. Set n_jobs=1 to skip parallel processing.
-
-    print('Parallel Test Successful.', end='\t\t\t\t\n')
