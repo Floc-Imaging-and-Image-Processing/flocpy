@@ -146,7 +146,7 @@ class ImgLoader(object):
 
 def run(flist, resolution, min_area, max_edgewidth, 
         method='difference', extra_params=[], index=None, save=False,
-        n_jobs=1):
+        n_jobs=1, report_progress=True):
     
     # Instantiate image loader object
     load_img = ImgLoader(flist, resolution)
@@ -186,12 +186,20 @@ def run(flist, resolution, min_area, max_edgewidth,
     else: 
         iterlist = index
     
+
     if isinstance(index, int):
         return process_one(index)
     elif n_jobs==1:
-        [process_one(imgix) for imgix in iterlist]
+        if report_progress=True:
+            iterator = tqdm(iterlist)
+        else:
+            iterator = iterlist
+        [process_one(imgix) for imgix in iterator]
     else:
-        Parallel(n_jobs=n_jobs)(delayed(process_one)(imgix) for imgix in iterlist)
+        if report_progress=True:
+            Parallel(n_jobs=n_jobs,verbose=10)(delayed(process_one)(imgix) for imgix in iterlist)
+        else:
+            Parallel(n_jobs=n_jobs)(delayed(process_one)(imgix) for imgix in iterlist)
     
 
 def filesorter(path, extension, sortby=os.path.basename):

@@ -62,7 +62,7 @@ class FlocSample(object):
 class FlocData(object):
     def __init__(self, flist, tlist, min_floc_size, max_edgewidth, 
                  sediment_density, primary_particle_size, fractal_dimension, 
-                 frame_area, focal_range):
+                 frame_area, focal_range, report_progress=True):
         
         self.flist = flist
         self.tframes = tlist
@@ -75,8 +75,14 @@ class FlocData(object):
         min_area = np.pi * (min_floc_size/2)**2
         
         self.frames = np.empty(len(self.flist), 'object')
-        print('loading')
-        for i in tqdm.tqdm(range(len(self.frames))):
+        
+        if report_progress==True:
+            print('Loading data')
+            iterator = tqdm.tqdm(range(len(self.frames)))
+        else: 
+            iterator = range(len(self.frames))
+
+        for i in iterator:
             fdf = pd.read_csv(flist[i])
             fdf = fdf[(fdf['edgewidth'] < max_edgewidth) & (fdf['area'] > min_area)]
             fdf['D'] = 2 * (fdf['area']/np.pi)**0.5
