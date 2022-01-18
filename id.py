@@ -14,6 +14,7 @@ from skimage.measure import label, regionprops, regionprops_table
 from skimage.morphology import closing, square, disk, binary_erosion
 from skimage.restoration import  denoise_wavelet
 
+from tqdm import tqdm
 from joblib import Parallel, delayed
 
 # ===================================================================
@@ -21,18 +22,18 @@ from joblib import Parallel, delayed
 # ===================================================================
 
 class FlocImg(object):
-    """
-    Image data object with metadata
-    
-    Parameters:
-        - data: the M x N image data.
-        - bgval: average pixel value of the background
-        - fgval: average pixel value of flocs
-        - threshold: value separating flocs from background
-    
-    """
     
     def __init__(self, data, bgval, fgval, threshold, resolution):
+        """
+        Image data object with metadata
+        
+        Parameters:
+            - data: the M x N image data.
+            - bgval: average pixel value of the background
+            - fgval: average pixel value of flocs
+            - threshold: value separating flocs from background
+        
+        """
         self.data = data
         self.bgval = bgval
         self.fgval = fgval
@@ -40,11 +41,7 @@ class FlocImg(object):
         self.resolution = resolution
         
     def identify_flocs(self, extra_params=[]):
-        
-        """ Performs floc identification on target image 
-        Arguments:
-            
-        img_object: an instance of FlocImg
+        """ Performs floc identification on target image
         
         """
         
@@ -200,25 +197,3 @@ def run(flist, resolution, min_area, max_edgewidth,
             Parallel(n_jobs=n_jobs,verbose=10)(delayed(process_one)(imgix) for imgix in iterlist)
         else:
             Parallel(n_jobs=n_jobs)(delayed(process_one)(imgix) for imgix in iterlist)
-    
-
-def filesorter(path, extension, sortby=os.path.basename):
-    unsorted_flist = glob.glob(path+os.sep+'*'+extension)
-    return sorted(unsorted_flist, key=sortby)
-# ===================================================================
-# Main
-# ===================================================================
-
-if __name__ == "__main__":
-    path = os.getcwd()
-
-    flist = file_sorter(path, extension=None)
-
-    out = run(flist, 
-              resolution=1,             # units per pixel
-              min_area=0,               # minimum floc size to save (units)
-              max_edgewidth=np.inf,     # maximum value of edge width to save (proxy for focus)
-              extra_params=[],          # specify other parameters to save
-              index=None,               # process a single image
-              save=True,                # save results as a csv
-              n_jobs=4)                 # parallel processing. Set n_jobs=1 to skip parallel processing.
