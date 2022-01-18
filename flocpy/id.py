@@ -18,8 +18,57 @@ from tqdm import tqdm
 from joblib import Parallel, delayed
 
 # ===================================================================
-# Objects
+# Classes
 # ===================================================================
+
+class ImgLoader(object):
+    
+    def __init__(self, flist, resolution):
+        """Instantiate object for loading images
+        
+        Arguments:
+          - flist: Sorted list of files. Order is important if using
+            image differencing.
+            
+        """
+            
+        self.flist = flist
+        self.resolution = resolution
+        
+    def difference(self, index):
+        """ Create FlocImg object using differencing algorithm """
+        
+        # load denoised images
+        target_img = denoise_wavelet(io.imread(flist[index]))
+        previous = denoise_wavelet(io.imread(flist[index-1]))
+
+        # compute image difference
+        img = target_img - previous
+        img[img > 0] = 0
+        
+        # calculate meta parameters
+        threshold = threshold_isodata(target_img)
+        bgval = np.nanmean(target_img[target_img > threshold])
+        fgval = np.nanmean(target_img[target_img < threshold])
+
+        # rescale image
+        data = bgval+img
+        data[data<0] = 0
+        return FlocImg(data, bgval, fgval, threshold, self.resolution)
+
+
+    def single(self, index):
+        """ Create FlocImg object using a single denoised image """
+        data = denoise_wavelet(io.imread(flist[imgix]))
+        # TODO: implement rolling ball filter for removing background
+        
+        # calculate meta parameters
+        threshold = threshold_isodata(data)
+        bgval = np.nanmean(data[data > threshold])
+        fgval = np.nanmean(data[data < threshold])
+        
+        return FlocImg(data, bgval, fgval, threshold, self.resolution)
+
 
 class FlocImg(object):
     
@@ -87,54 +136,6 @@ class FlocImg(object):
 
         return flocdf
 
-# ===================================================================
-class ImgLoader(object):
-    
-    def __init__(self, flist, resolution):
-        """Instantiate object for loading images
-        
-        Arguments:
-          - flist: Sorted list of files. Order is important if using
-            image differencing.
-            
-        """
-            
-        self.flist = flist
-        self.resolution = resolution
-        
-    def difference(self, index):
-        """ Create FlocImg object using differencing algorithm """
-        
-        # load denoised images
-        target_img = denoise_wavelet(io.imread(flist[index]))
-        previous = denoise_wavelet(io.imread(flist[index-1]))
-
-        # compute image difference
-        img = target_img - previous
-        img[img > 0] = 0
-        
-        # calculate meta parameters
-        threshold = threshold_isodata(target_img)
-        bgval = np.nanmean(target_img[target_img > threshold])
-        fgval = np.nanmean(target_img[target_img < threshold])
-
-        # rescale image
-        data = bgval+img
-        data[data<0] = 0
-        return FlocImg(data, bgval, fgval, threshold, self.resolution)
-
-
-    def single(self, index):
-        """ Create FlocImg object using a single denoised image """
-        data = denoise_wavelet(io.imread(flist[imgix]))
-        # TODO: implement rolling ball filter for removing background
-        
-        # calculate meta parameters
-        threshold = threshold_isodata(data)
-        bgval = np.nanmean(data[data > threshold])
-        fgval = np.nanmean(data[data < threshold])
-        
-        return FlocImg(data, bgval, fgval, threshold, self.resolution)
 
 # ===================================================================
 # Functions

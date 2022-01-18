@@ -2,6 +2,7 @@
 # Imports
 #-------------------------------------------------------
 
-from pyfloc.pyfloc import ImgLoader, FlocID, run, file_sorter
-from pyfloc.test import *
+from flocpy.id import ImgLoader, run
+from flocpy.stats import FlocData
+from flocpy.test import *
 
