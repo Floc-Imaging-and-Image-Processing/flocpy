@@ -13,6 +13,7 @@ from skimage.segmentation import clear_border
 from skimage.measure import label, regionprops, regionprops_table
 from skimage.morphology import closing, square, disk, binary_erosion
 from skimage.restoration import  denoise_wavelet
+from skimage.color import label2rgb
 
 from tqdm import tqdm
 from joblib import Parallel, delayed
@@ -39,8 +40,8 @@ class ImgLoader(object):
         """ Create FlocImg object using differencing algorithm """
         
         # load denoised images
-        target_img = denoise_wavelet(io.imread(flist[index]))
-        previous = denoise_wavelet(io.imread(flist[index-1]))
+        target_img = denoise_wavelet(io.imread(self.flist[index]))
+        previous = denoise_wavelet(io.imread(self.flist[index-1]))
 
         # compute image difference
         img = target_img - previous
@@ -54,7 +55,7 @@ class ImgLoader(object):
         # rescale image
         data = bgval+img
         data[data<0] = 0
-        return FlocImg(data, bgval, fgval, threshold, self.resolution)
+        return FlocImg(data, bgval, fgval, threshold, self.resolution, target_img)
 
 
     def single(self, index):
@@ -72,7 +73,7 @@ class ImgLoader(object):
 
 class FlocImg(object):
     
-    def __init__(self, data, bgval, fgval, threshold, resolution):
+    def __init__(self, data, bgval, fgval, threshold, resolution, raw_img=None):
         """
         Image data object with metadata
         
@@ -88,6 +89,7 @@ class FlocImg(object):
         self.fgval = fgval
         self.threshold = threshold
         self.resolution = resolution
+        self.raw_img = raw_img
         
     def identify_flocs(self, extra_params=[]):
         """ Performs floc identification on target image
@@ -113,10 +115,11 @@ class FlocImg(object):
         rescaled_intensity = (self.data - self.bgval)/(self.fgval - self.bgval)
         grad = sobel(rescaled_intensity.astype(float))
         grad[~edgemask] = np.nan
+        self.grad=grad
         
         def average_edge_gradient(regionmask, intensity_image):
             return np.nanmean(intensity_image)
-        
+
         self.flocs.update(regionprops_table(self.label_image, grad, properties=[],
                                      extra_properties=(average_edge_gradient,)))
         
@@ -136,13 +139,44 @@ class FlocImg(object):
 
         return flocdf
 
+    def get_regions(self, min_area=0, max_edgewidth=np.inf):
+        regions = regionprops(self.label_image)
+        ix = (self.flocs['edgewidth'] < max_edgewidth) & \
+        (self.flocs['area'] > min_area)
+        return np.array(regions)[ix]
+
+    def plot_segmentation(self, ax, min_area=0, max_edgewidth=np.inf,
+                      use_raw_img=True, show_overlay=True, show_boxes=True,  box_color='k', box_thickness=0.5):
+
+        if use_raw_img:
+            plotimg = self.raw_img
+        else:
+            plotimg = self.data
+
+
+        if show_overlay:
+            image_label_overlay = label2rgb(self.label_image, image=plotimg, bg_label=0)
+            ax.imshow(image_label_overlay)
+        else:
+            ax.imshow(plotimg, cmap='Greys_r')
+
+        if show_boxes:
+            regions = self.get_regions(min_area, max_edgewidth)
+            
+            for region in regions:
+                minr, minc, maxr, maxc = region.bbox
+                rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
+                          fill=False, edgecolor=box_color, linewidth=box_thickness)
+                ax.add_patch(rect)
+
+
 
 # ===================================================================
 # Functions
 # ===================================================================
 
 
-def run(flist, resolution, min_area, max_edgewidth, 
+def run_analysis(flist, resolution, min_area, max_edgewidth, 
         method='difference', extra_params=[], index=None, save=False,
         n_jobs=1, report_progress=True):
     
@@ -188,13 +222,13 @@ def run(flist, resolution, min_area, max_edgewidth,
     if isinstance(index, int):
         return process_one(index)
     elif n_jobs==1:
-        if report_progress=True:
+        if report_progress==True:
             iterator = tqdm(iterlist)
         else:
             iterator = iterlist
         [process_one(imgix) for imgix in iterator]
     else:
-        if report_progress=True:
+        if report_progress==True:
             Parallel(n_jobs=n_jobs,verbose=10)(delayed(process_one)(imgix) for imgix in iterlist)
         else:
             Parallel(n_jobs=n_jobs)(delayed(process_one)(imgix) for imgix in iterlist)
