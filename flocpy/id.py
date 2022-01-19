@@ -73,7 +73,7 @@ class ImgLoader(object):
 
 class FlocImg(object):
     
-    def __init__(self, data, bgval, fgval, threshold, resolution, raw_img=None):
+    def __init__(self, data, bgval, fgval, threshold, resolution, raw_img = None):
         """
         Image data object with metadata
         
@@ -202,7 +202,7 @@ def run_analysis(flist, resolution, min_area, max_edgewidth,
         if save==True:
             flocdf.to_csv(fname+'.csv', index_label='floc_ID')
         
-        if isinstance(index, int):
+        if isinstance(index, np.integer):
             return floc_img
     
     if method=='difference':
@@ -211,7 +211,7 @@ def run_analysis(flist, resolution, min_area, max_edgewidth,
         startix=0
     
     # if index isn't specified, iterate over all files in flist
-    if isinstance(index, int):
+    if isinstance(index, np.integer):
         iterlist = [index,]
     elif isinstance(index, type(None)):
         iterlist = range(len(flist))
@@ -219,7 +219,7 @@ def run_analysis(flist, resolution, min_area, max_edgewidth,
         iterlist = index
     
 
-    if isinstance(index, int):
+    if isinstance(index, np.integer):
         return process_one(index)
     elif n_jobs==1:
         if report_progress==True:
