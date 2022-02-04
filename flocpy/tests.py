@@ -8,5 +8,4 @@ __all__ = ['dotest']
 def dotest():
     # File name formatting string things
     datadir = flocpy.__path__[0]+os.sep+'testdata'
-    
-    print('Test successful edited')
+    print(datadir)

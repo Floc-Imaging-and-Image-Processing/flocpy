@@ -9,6 +9,10 @@ To install from the command prompt:
 
 2. Create a new python environment
 
->>>conda create --name flocpyenv anaconda
+>>> conda create --name flocpyenv anaconda
 
-3. 
+3. install with pip
+
+>>> pip install flocpy
+
+
