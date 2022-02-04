@@ -1,3 +1,14 @@
+Metadata-Version: 2.1
+Name: flocpy
+Version: 0.1.dev0
+Summary: Floc image processing tools
+Home-page: https://github.com/Floc-Imaging-and-Image-Processing/flocpy
+Author: Thomas Ashley
+Author-email: tashley22@gmail.com
+License: MIT
+Platform: UNKNOWN
+Description-Content-Type: text/markdown
+
 Mud floc image processing tools
 
 Currently only tested on Windows machines
@@ -12,3 +23,4 @@ To install from the command prompt:
 >>>conda create --name flocpyenv anaconda
 
 3. 
+

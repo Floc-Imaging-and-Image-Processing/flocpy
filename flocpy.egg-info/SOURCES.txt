@@ -1,0 +1,12 @@
+README.md
+setup.py
+flocpy/__init__.py
+flocpy/__main__.py
+flocpy/id.py
+flocpy/stats.py
+flocpy/tests.py
+flocpy.egg-info/PKG-INFO
+flocpy.egg-info/SOURCES.txt
+flocpy.egg-info/dependency_links.txt
+flocpy.egg-info/requires.txt
+flocpy.egg-info/top_level.txt

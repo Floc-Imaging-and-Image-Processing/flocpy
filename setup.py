@@ -15,8 +15,8 @@ setup(
     author="Thomas Ashley",
     author_email="tashley22@gmail.com",
     license="MIT",
-    packages=["flocpy", "id", "stats"],
+    packages=["flocpy"],
     include_package_data=True,
-    install_requires=["scikit-image>=0.18.1", "numpy", "matplotlib", "pandas"
+    install_requires=["scikit-image>=0.18.1", "numpy", "matplotlib", "pandas",
     "datetime", "tqdm", "joblib", "scipy", "statsmodels"]
 )

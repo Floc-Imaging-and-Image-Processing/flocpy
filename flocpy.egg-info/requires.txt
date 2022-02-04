@@ -1,0 +1,9 @@
+scikit-image>=0.18.1
+numpy
+matplotlib
+pandas
+datetime
+tqdm
+joblib
+scipy
+statsmodels
