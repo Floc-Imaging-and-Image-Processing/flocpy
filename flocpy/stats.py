@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,7 +8,6 @@ import glob
 from scipy.interpolate import interp1d
 import statsmodels.api as sm
 from statsmodels.nonparametric.smoothers_lowess import lowess
-import os
 import tqdm
 
 # ===================================================================

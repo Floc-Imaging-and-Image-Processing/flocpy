@@ -1,9 +1,7 @@
 import os
-import glob
 import numpy as np
 import pandas as pd
 import datetime as dt
-import time
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
@@ -22,7 +20,7 @@ from joblib import Parallel, delayed
 # Classes
 # ===================================================================
 
-class ImgLoader(object):
+class ImgSequence(object):
     
     def __init__(self, flist, resolution):
         """Instantiate object for loading images
@@ -66,7 +64,6 @@ class ImgLoader(object):
 
         return FlocImg(data, bgval, fgval, threshold, self.resolution, target_img)
         
-
 
     def single(self, index):
         """ Create FlocImg object using a single denoised image """
@@ -190,12 +187,12 @@ class FlocImg(object):
 # ===================================================================
 
 
-def run_analysis(flist, resolution, min_area, max_edgewidth, 
-        method='difference', extra_params=[], index=None, save=False,
+def identify_flocs(flist, resolution, min_area, max_edgewidth, 
+        method='difference', extra_params=[], index=None, save=False, return_data=False,
         n_jobs=1, report_progress=True):
     
     # Instantiate image loader object
-    load_img = ImgLoader(flist, resolution)
+    load_img = ImgSequence(flist, resolution)
     
     def process_one(i):
         # get filename for saving
@@ -210,13 +207,14 @@ def run_analysis(flist, resolution, min_area, max_edgewidth,
         # perform floc ID
         floc_img.identify_flocs(extra_params)
         
-        # get floc dataframe and save
-        flocdf = floc_img.get_floc_table(min_area, max_edgewidth)
         
+        # get dataframe of parameters and save
+
         if save==True:
+            flocdf = floc_img.get_floc_table(min_area, max_edgewidth)
             flocdf.to_csv(fname+'.csv', index_label='floc_ID')
         
-        if isinstance(index, np.integer):
+        if return_data:
             return floc_img
     
     if method=='difference':
@@ -234,15 +232,17 @@ def run_analysis(flist, resolution, min_area, max_edgewidth,
     
 
     if isinstance(index, np.integer):
-        return process_one(index)
+        out =  process_one(index)
     elif n_jobs==1:
         if report_progress==True:
             iterator = tqdm(iterlist)
         else:
             iterator = iterlist
-        [process_one(imgix) for imgix in iterator]
+        out = [process_one(imgix) for imgix in iterator]
     else:
         if report_progress==True:
-            Parallel(n_jobs=n_jobs,verbose=10)(delayed(process_one)(imgix) for imgix in iterlist)
+            out = Parallel(n_jobs=n_jobs,verbose=10)(delayed(process_one)(imgix) for imgix in iterlist)
         else:
-            Parallel(n_jobs=n_jobs)(delayed(process_one)(imgix) for imgix in iterlist)
+            out = Parallel(n_jobs=n_jobs)(delayed(process_one)(imgix) for imgix in iterlist)
+
+    return out

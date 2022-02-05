@@ -22,7 +22,7 @@ from joblib import Parallel, delayed
 # Classes
 # ===================================================================
 
-class ImgLoader(object):
+class ImgSequence(object):
     
     def __init__(self, flist, resolution):
         """Instantiate object for loading images

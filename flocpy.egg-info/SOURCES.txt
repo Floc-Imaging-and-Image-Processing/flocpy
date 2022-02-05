@@ -5,6 +5,7 @@ flocpy/__main__.py
 flocpy/id.py
 flocpy/stats.py
 flocpy/tests.py
+flocpy/utils.py
 flocpy.egg-info/PKG-INFO
 flocpy.egg-info/SOURCES.txt
 flocpy.egg-info/dependency_links.txt

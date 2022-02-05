@@ -1,5 +1,3 @@
-
-
 __version__ = "0.1.dev"
 
 
@@ -7,6 +5,7 @@ __version__ = "0.1.dev"
 # Imports
 #-------------------------------------------------------
 
-from flocpy.id import ImgLoader, run_analysis
+from flocpy.id import ImgSequence, identify_flocs
 from flocpy.stats import FlocData
+from flocpy.utils import *
 from flocpy.tests import *

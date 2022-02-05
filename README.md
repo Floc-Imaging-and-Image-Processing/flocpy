@@ -15,4 +15,4 @@ To install from the command prompt:
 
 >>> pip install flocpy
 
-
+![Example Output](example.png)
