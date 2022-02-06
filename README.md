@@ -2,6 +2,6 @@ Mud floc image processing tools
 
 Currently only tested on Windows machines
 
-Not currently released
+See jupyter notebooks in "examples" (in progress)
 
 ![Example Output](example.png)
