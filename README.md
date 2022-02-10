@@ -96,7 +96,7 @@ out1 = flocpy.identify_flocs(sorted_flist_1,
                             max_edgewidth=np.inf,
                             extra_params=[], 
                             index=None,
-                            save=False,            # output included with package
+                            save=False,
                             return_data=True,
                             n_jobs=2,
                             report_progress=True)
@@ -139,6 +139,7 @@ ax[1,1].set_title('Flocs that meet area and focus criteria')
 out1[imgix].plot_segmentation(ax[1,1], min_diameter=10, max_edgewidth=10, use_raw_img=False, show_overlay=False, show_boxes=True, 
                          box_color='r', box_thickness=1)
 
+fig.patch.set_facecolor('white')
 plt.tight_layout()
 ```
 
@@ -157,7 +158,7 @@ out2 = flocpy.identify_flocs(sorted_flist_2,
                             max_edgewidth=np.inf,
                             extra_params=[], 
                             index=None,
-                            save=False,                  # output included with package
+                            save=False,
                             return_data=True,
                             n_jobs=2,
                             report_progress=True)
@@ -192,6 +193,7 @@ ax[1,1].set_title('Flocs that meet area and focus criteria')
 out2[2].plot_segmentation(ax[1,1], min_diameter=10, max_edgewidth=4, use_raw_img=False, show_overlay=False, show_boxes=True, 
                          box_color='r', box_thickness=1)
 
+fig.patch.set_facecolor('white')
 plt.tight_layout()
 ```
 
@@ -249,7 +251,7 @@ floc_dataframe.set_index('index', inplace=True)
     Loading data
     
 
-    100%|██████████████████████████████████████████████████████████████████████████████████| 19/19 [00:00<00:00, 97.20it/s]
+    100%|██████████████████████████████████████████████████████████████████████████████████| 19/19 [00:00<00:00, 60.10it/s]
     
 
 
@@ -357,18 +359,13 @@ ax.set_xticklabels([10, 20, 30, 40, 50, 60, '', 80, '', 100, 200])
 
 ax.set_ylabel('% finer by mass')
 ax.set_xlabel(r'Floc Diameter ($\mu$m)')
+
+fig.patch.set_facecolor('white')
 ```
 
 
-
-
-    Text(0.5, 0, 'Floc Diameter ($\\mu$m)')
-
-
-
-
     
-![png](output_16_1.png)
+![png](output_16_0.png)
     
 
 
@@ -565,18 +562,12 @@ ax.plot(floc_dataframe.Df_50, marker='o')
 ax.set_xlabel('Frame number')
 ax.set_xticks(np.arange(0, 19, 3))
 ax.set_ylabel(r'Median Floc Diameter ($\mu$m)')
+fig.patch.set_facecolor('white')
 ```
 
 
-
-
-    Text(0, 0.5, 'Median Floc Diameter ($\\mu$m)')
-
-
-
-
     
-![png](output_19_1.png)
+![png](output_19_0.png)
     
 
 
