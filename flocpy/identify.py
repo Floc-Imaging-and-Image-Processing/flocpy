@@ -189,7 +189,7 @@ class FlocImg(object):
 # ===================================================================
 
 
-def identify_flocs(flist, resolution, min_diameter, max_edgewidth, 
+def identify_flocs(flist, resolution=1, min_diameter=0, max_edgewidth=np.inf, 
         method='difference', extra_params=[], index=None, save=False, return_data=False,
         n_jobs=1, report_progress=True):
 
@@ -248,11 +248,3 @@ def identify_flocs(flist, resolution, min_diameter, max_edgewidth,
             out = Parallel(n_jobs=n_jobs)(delayed(process_one)(imgix) for imgix in iterlist)
 
     return out
-
-
-# ===================================================================
-# Main
-# ===================================================================
-
-if __name__ == "__main__":
-    print('main function')

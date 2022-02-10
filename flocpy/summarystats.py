@@ -190,3 +190,7 @@ def calculate_summarystats(flist, frame_area, focal_range, min_floc_diameter, ma
                  frame_area, focal_range, min_floc_diameter, max_edgewidth)
 
     return flocdata
+
+
+if __name__ == '__main__':
+    print('this is a test')
